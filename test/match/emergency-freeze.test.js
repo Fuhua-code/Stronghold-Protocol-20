@@ -192,7 +192,7 @@ test('emergency and solo pause overlap without double-shifting clocks or double-
 });
 
 test('Final Assault freezes overtime, silence handover and AI pacer; resumes the same budget', (t) => {
-  const h = setup(t, { bots: 2, clientCombat: true, clients: false });
+  const h = setup(t, { humans: 1, bots: 3, clientCombat: true, clients: false });
   const m = h.m;
   h.toPrep();
   // Target-state fixture: directly enter the boss round, without simulating all preceding rounds.

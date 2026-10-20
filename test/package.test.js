@@ -67,7 +67,6 @@ test('selection: runtime files in; tests, maintainer tools, other docs, dev page
   assert.equal(keep.length, 38, keep.join(' '));
   assert.ok(keep.includes('tools/announcements.mjs'));
   assert.ok(keep.includes('docs/ANNOUNCEMENTS.md'));
-  assert.ok(keep.includes('tools/plugin.mjs'));
   assert.ok(drop.includes('runtime/announcements/index.json'));
   assert.equal(drop.length, 41, drop.join(' '));
   assert.ok(!keep.some((f) => drop.includes(f)));

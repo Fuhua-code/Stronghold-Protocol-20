@@ -110,6 +110,7 @@ export function installTestTrace(m, opts) {
   m.sched = {
     virtual: scheduler.virtual, instant: scheduler.instant,
     now: () => eventNow ?? scheduler.now(),
+    gameNow: () => eventNow ?? (typeof scheduler.gameNow === 'function' ? scheduler.gameNow() : scheduler.now()),
     setTimeout: (fn, ms) => register('setTimeout', fn, ms),
     setInterval: (fn, ms) => register('setInterval', fn, ms),
     clearTimeout: (h) => scheduler.clearTimeout(h),

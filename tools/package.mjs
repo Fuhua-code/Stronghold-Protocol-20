@@ -128,7 +128,7 @@ export const shipsPacks = (files) => files.some((f) => /^public\/i18n\/[^/]+\.js
 /** Never from the tracked list: the dev pages, and what only the art plan adds (or npm ci writes). */
 const NOT_TRACKED_SHIP = ['public/dev/', 'public/assets/', 'public/fonts/', 'public/vendor/'];
 /** The npm scripts a player runs: each `node <file>` of them must ship. */
-export const PLAYER_NPM_SCRIPTS = ['start', 'setup', 'doctor', 'launch', 'postinstall', 'vendor', 'assets', 'assets:pack'];
+export const PLAYER_NPM_SCRIPTS = ['start', 'setup', 'doctor', 'launch', 'postinstall', 'vendor', 'assets'];
 /** Markdown copied into the zip. Relative links to anything else are rewritten at stage time. */
 export const PLAYER_MARKDOWN = [...ROOT_FILES, ...PLAYER_DOCS, 'plugins/README.md', 'plugins/AGENTS.md'].filter((f) => f.endsWith('.md'));
 /** Where a packaged doc link points when the file itself is not in the zip. */

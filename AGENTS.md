@@ -1,60 +1,160 @@
 # AGENTS.md
 
-Entry point for AI coding assistants (Codex, Claude Code, Cursor, Copilot …) working on this repository. It only
-indexes the existing documents and their hard rules; when this file and a linked document disagree, the document wins.
-Human contributors: [CONTRIBUTING.md](CONTRIBUTING.md) is the same material in full.
+Entry point for AI coding assistants (Codex, Claude Code, Cursor, Copilot, Qoder …) working on this repository. This is
+the fork's onboarding index: what the code is, where it lives, which rules are not negotiable, and how to verify a
+change. When this file and a linked document disagree, the linked document wins. Human contributors:
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
-This fork's capacity and announcement extensions follow the approved decisions in
-[docs/development/DECISIONS.md](docs/development/DECISIONS.md); start local maintenance and upstream merges at
-[docs/development/README.md](docs/development/README.md). The upstream references below describe the original scope.
+## 1. What this checkout is
 
-## What this is
+A non-commercial fan remake of Arknights「卫戍协议：盟约」 that runs in the browser: a Node.js server (rooms, economy,
+rounds) and a deterministic battle simulation shared by the server and the browser.
 
-A non-commercial fan remake of Arknights「卫戍协议：盟约」 that runs in the browser: a Node.js server (economy, rounds,
-rooms) and a deterministic battle sim shared by the server and the browser. It aims to be faithful to the official mode.
+This checkout is **Fuhua-code/Stronghold-Protocol-20**, the 20-player line:
 
-## Read first
+- Base extension: LongQianChen's `feat/IncreasePlayerCapacity` (`d7d541e7`), built on upstream v0.2.6.
+- Upstream sync: `sganggs/Stronghold-Protocol` `master` `c9d804f` (package version 0.3.1; the commits call the
+  in-progress release 0.3.2, the published release is v0.3.1).
+- Integration merge: `abb3c74f` (2026-10-21), 53 conflicting files resolved by hand.
+- Default branch: `master` is the 20-player line. `upstream/master` remains the author's line; `lqc/*` is the
+  LongQianChen fork. The original `feat/IncreasePlayerCapacity` history is kept.
+- Release naming: `v0.3.1-20p.6`. `package.json.version` stays **0.3.1** (stable SemVer) because the external Android
+  packager requires `x.y.z`; the APK uses `versionCode` **3002** and package `io.prts.stronghold`.
 
-1. [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — the code map: where things live, data flow, golden results,
-   import boundaries, where common changes start.
-2. [docs/DESIGN.md](docs/DESIGN.md) — the index of the rules: current rules in `docs/design/`, each release's
-   revisions and their evidence in `docs/history/`.
-3. The reference for the part you touch: [docs/SIM.md](docs/SIM.md) (battle engine API, hooks, test harness),
-   [docs/META.md](docs/META.md) (match flow, shop, protocol), [docs/DATA.md](docs/DATA.md) (generated data),
-   [docs/I18N.md](docs/I18N.md) (interface strings), `server/sim/content/kits/README.md` (operator kits).
+Two feature worlds coexist and must both keep working:
 
-## Hard rules
+1. **Upstream 0.3.1**: plugins (cosmetic / data / gameplay / UI / script), content sets and content hosts, the plugin
+   studio, skins, official effects/3D board, the new match UI, test rooms, rehearsal, and content hashes (`cs`/`vs`).
+2. **This fork**: 20-player capacity, fixed pool groups, parallel group drafts, group item pools, multi-round unite
+   voting, announcements, server settings, lobby discovery, match chat, asset pre-cache, compact wire, runtime cache,
+   bandwidth emergency, and the 20-player UI.
 
-- **Official first.** Rules come from the official data tables (`.cache/gamedata/excel/` after setup) and
-  [PRTS](https://prts.wiki/). A detail no source settles is implemented the simplest way and marked `[ASSUMED]` in the
-  code and the PR. Deliberate deviations from the official mode are the maintainer's decision only.
-- **Determinism.** `server/sim/` is plain ESM that runs in Node and in browsers: no Node APIs, no `Math.random`, no
-  clocks, and no engine-approximated Math functions (use `server/sim/detmath.js`; ESLint and
-  `test/sim/detmath.test.js` enforce it).
-- **Golden results.** A refactor must not change `test/golden/*.json`. An intended gameplay change runs
-  `npm run golden:update` in the same commit, and the commit / PR names every moved scenario and why
-  ([test/golden/README.md](test/golden/README.md)).
-- **Generated data.** Never hand-edit `data/*.json`: change `tools/build-data.mjs` and regenerate.
-- **No game art in git.** `public/assets/` is ignored; never commit extracted or downloaded game files.
-- **Interface strings** go through `t('…')`, with entries in every pack under `public/i18n/`
-  (`node tools/i18n.mjs check --all --strict`).
-- **Docs follow the code.** A rule change updates `docs/design/`, the current `docs/history/` file and the reference
-  docs; run `node --test test/docs-consistency.test.js test/docs-paths.test.js`.
-- **Commits and PRs**: one topic per PR; a one-line message of what changed (Chinese or English) with the issue number;
-  no attribution trailers (`Co-Authored-By:`, `Generated with …`). The PR description states what, why, the sources,
-  the `[ASSUMED]` points, the tests you ran (paste the summary lines) and the golden moves. No ads, payments or other
-  monetisation — the project stays non-commercial.
+## 2. Read first
 
-## Verify
+1. [docs/development/README.md](docs/development/README.md), then [DECISIONS.md](docs/development/DECISIONS.md) and
+   [UPSTREAM.md](docs/development/UPSTREAM.md). D001–D038 are the fork's approved decisions; they override convenience
+   or upstream defaults where they differ. The current merge record is
+   [records/2026-10-21-01-upstream-v0.3.1.md](docs/development/records/2026-10-21-01-upstream-v0.3.1.md).
+2. [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — the code map, data flow and import boundaries.
+3. The rules for the part you touch: [docs/DESIGN.md](docs/DESIGN.md) and `docs/design/`; [docs/PLAYER_CAPACITY.md](docs/PLAYER_CAPACITY.md);
+   [docs/ASSET_CACHE.md](docs/ASSET_CACHE.md); [docs/ANNOUNCEMENTS.md](docs/ANNOUNCEMENTS.md);
+   [docs/SERVER_SETTINGS.md](docs/SERVER_SETTINGS.md); [docs/WIRE_PROTOCOL.md](docs/WIRE_PROTOCOL.md);
+   [docs/HTTP_CACHE.md](docs/HTTP_CACHE.md); upstream references [docs/SIM.md](docs/SIM.md), [docs/META.md](docs/META.md),
+   [docs/DATA.md](docs/DATA.md), [docs/I18N.md](docs/I18N.md), [docs/PLUGINS.md](docs/PLUGINS.md),
+   [docs/SKINS.md](docs/SKINS.md).
 
-Run the tests of what you touched first, then everything before opening the PR:
+The 20-player rules that are easiest to break:
+
+- **D001** rooms hold 4 / 8 / 10 / 16 / 20, default 8; empty seats and up to 2 spectators never count.
+- **D010/D012** fixed pool groups by seat order (3/4/5-player groups); every group drafts in parallel with its own six
+  cards, 50 s strategy turns, 30 s first / 16 s later 机变 turns; cross-group repeats are legal.
+- **D013** unite rounds are capped by the fixed group count (≤ 5), with per-round majority voting.
+- **D009/D036** leader pools scale with living players; pairings are seeded and stay stable from prep to battle.
+- **D029/D034/D035** item stock is per fixed group (five-player groups expand), displayed picks may debt the group,
+  and AI avoidance only considers the same group's living teammates.
+- **D016/D025/D031/D038** asset cache is explicit and hash-addressed; never add an automatic full-catalog download,
+  never delete a player's cache as a repair step, and keep the old-directory update cooldown at 5 s/IP.
+- **D014/D015** announcements are ordinary vs. urgent notices; images are read-only from the announcement store.
+- **D017/D032** lobby discovery is opt-in, paginated and capacity-aware; matchmaking is the host's toggle.
+- **D023** a solo seat may reconnect for 2 hours; co-op 10 minutes; waiting-room 60 seconds.
+- **D030** bandwidth emergency defaults off; when triggered it protects running matches, blocks new HTTP/identities,
+  freezes clocks/timers, and retries every 60 seconds. Do not turn it into an automatic sampler.
+- **D037** the player package carries this fork's docs and their tracked reference closure.
+
+## 3. Source map (start at the real file)
+
+| Area | Start here | Notes |
+|---|---|---|
+| Process entry | `server/index.js` | `startServer()` wires content hash → plugin registry → visual/content sets → match hosts → `Lobby` → static handler → asset cache → announcements/settings → bandwidth emergency → HTTP/WS. Keep this order: rooms and the static handler consume the content/visual sets. |
+| Rooms & lobby | `server/lobby.js` (`Room`, `Lobby`) | seats/capacity, host/AI/spectator lifecycle, test rooms, plugin and content-set choice, the per-room message queue (`serial`), `onMessage` → `handleMessage`. Discovery lives in `server/lobbyDiscovery.js`; chat in `server/matchChat.js`. |
+| Match | `server/match/Match.js` + `server/match/match/` | the class constructor is in `Match.js`; methods are installed from `phases.js`, `intents.js`, `spDraft.js`, `unitePhase.js`, `bossRounds.js`, `settle.js`, `views.js`, `clientCombat.js`, `reports.js`, `rehearsal.js`, `host/proxy.js`. |
+| Player | `server/match/PlayerState.js` + `server/match/player/` | `economy.js` (shop/refresh/price), `acquire.js` (gains/merges/debt), `prep.js`, `pieces.js`, `items.js`, `diy.js`, `views.js`. |
+| Pools/capacity | `server/match/pool.js`, `shared/playerCapacity.js` | `SharedItemPool` carries both `scale` (five-player groups) and `debt` (displayed picks); `createPoolGroups` uses the fixed layouts. |
+| Protocol | `shared/protocol.js` | `C2S` validators are the wire contract; the fork and upstream fields are merged (capacity/assetCache/chat/discovery plus plugin offers/test rooms/content hashes). `shared/wireCodec.js` / `wireSchema.js` hold compact wire v1. |
+| Deterministic sim | `server/sim/` | plain ESM used by Node and browsers; no Node APIs, wall clock, `Math.random`, or engine-approximated Math (use `detmath.js`). Kits are under `server/sim/content/kits/`. |
+| HTTP | `server/http/files.js`, `static.js`, `routes.js`, `websocket.js`, `assetCache.js` | `serveFile`/`serveBuffer` are the fork's signatures (`serveBuffer(req,res,body,opts)`; HEAD mirrors GET ranges). `static.js` combines the runtime cache (`runtimeCache.js`) with plugin/content/visual routes and the served manifests. |
+| Client entry | `public/js/main.js` | router `title → lobby → room → game`, store/net wiring, announcement/asset-cache/chat hosts. Screens: `public/js/screens/{lobby,room,game}.js`; match UI: `public/js/ui/{choiceOverlay,teamPanel,hud,shopBar}.js`. |
+| Battle client | `public/js/battle/runner.js` | `InPageSimHost` / `WorkerSimHost` abstraction (`simHost.js`), `simLoader.js`, `simWorker*.js`; the 20P additions are `rawResult()` and `syncPool(hp, acked, max)`. |
+| Asset cache | `server/assetCacheCatalog.js`, `server/http/assetCache.js`, `shared/assetCache.js`, `public/js/assetCache.js`, `public/asset-cache-sw.js` | the fork's manager and upstream's imported-art helpers share `public/js/assetCache.js`; keep both export sets. |
+| Announcements/settings | `server/announcements.js`, `server/announcementNotices.js`, `server/serverSettings.js`, `tools/{announcements,server-settings}.mjs` | owner-only CLI data lives in `runtime/` (ignored), never in the player zip. |
+| Data & tools | `data/*.json`, `tools/` | data is generated by `tools/build-data.mjs`; never hand-edit. Packaging: `tools/package.mjs`, `package-update.mjs`, `asset-cache-pack.mjs`; Windows: `scripts/make-windows-bundle.mjs`. |
+| Plugins/studio | `server/plugins/`, `server/studio/`, `plugins/`, `packs/`, `schemas/` | upstream 0.3.x. A server's plugins and `plugins/config.json` are ignored/private; only the readmes, templates and schemas are tracked. |
+
+## 4. Hard rules
+
+- **Official first.** Rules come from official data/PRTS; mark unresolved details `[ASSUMED]`. Deliberate deviations
+  need a maintainer decision.
+- **Determinism and golden.** Do not change `test/golden/*.json` in a refactor. A gameplay change runs
+  `npm run golden:update` in the same commit, names the moved scenarios and why, and updates `docs/design/` +
+  `docs/history/`.
+- **Generated data.** Change `tools/build-data.mjs`, regenerate, and commit the data; never hand-edit `data/*.json`.
+- **No game art in git.** `public/assets/`, `public/fonts/`, `public/vendor/`, `node_modules/`, `.cache/`, `runtime/`,
+  player-installed plugins and build outputs are ignored. Never commit downloaded/extracted art, keys or machine paths.
+- **i18n.** UI strings go through `t('…')` and exist in every pack under `public/i18n/`; run
+  `node tools/i18n.mjs check --all --strict`.
+- **Docs follow code.** Update the design/history/reference docs and run
+  `node --test test/docs-consistency.test.js test/docs-paths.test.js`.
+- **Upstream merges use the decision checklist.** Never resolve a conflict with a whole-file ours/theirs. Record
+  “upstream changed / we need / final combination / verification” for each real trade-off. The procedure is in
+  [docs/development/UPSTREAM.md](docs/development/UPSTREAM.md).
+- **Commits/PRs:** one topic, a one-line message with the issue/topic, no attribution trailers. No monetisation.
+- **Reference checkouts outside this workspace are read-only.** Copy inputs; never write into them.
+
+## 5. Verify
 
 ```bash
-node --test test/<area>/<file>.test.js      # targeted
-npm run ci                                  # the CI checks locally (tools/ci.mjs): npm test, smoke, lint, imports, types
-npm run golden                              # golden results
+npm ci                                  # postinstall runs tools/vendor.mjs
+npm start                               # http://localhost:3000/healthz
+node --test test/<area>/<file>.test.js  # targeted first
+npm test                                # every Node suite
+npm run ci                              # npm test + smoke + lint + imports + typecheck (tools/ci.mjs)
+npm run lint                            # warnings allowed, errors fail
+npm run check:imports
+npm run typecheck
+npm run golden                          # full golden digests
+node tools/i18n.mjs check --all --strict
+node --test test/docs-consistency.test.js test/docs-paths.test.js
 ```
 
-Browser suites are off by default and need Chrome: `SP_E2E=1` (UI), `SP_REAL_E2E=1` (real match, needs assets),
-`RENDER_E2E=1`, `SIM_E2E=1` — see CONTRIBUTING.md §2. Battle tests are easiest with the helpers described in
-docs/SIM.md (the test harness section) and the patterns in `test/content/op_siege.test.js`.
+Browser/E2E suites are opt-in and need Chrome and, for some, downloaded art: `SP_E2E=1`, `SP_REAL_E2E=1`,
+`RENDER_E2E=1`, `SIM_E2E=1`. The CI job sets them to `0`.
+
+For the 20P extension, the high-value suites are `test/match/runner.test.js`, `test/match/` (pools, drafts, unite,
+settle), `test/ui/` (lobby discovery, announcements, asset cache, group drafts, team panel, chat), `test/asset-index.test.js`,
+`test/announcement-assets-http.test.js`, `test/emergency-network.test.js`, and `test/client-static.test.js`.
+
+## 6. Release and Android tasks
+
+The integrated player package (upstream style):
+
+```bash
+npm run package -- --dry-run --list     # inspect
+npm run package -- --out dist           # full zip
+npm run package:lite -- --out dist      # lite zip
+npm run assets:pack -- --out dist       # asset-cache zip (+ --catalog-only for JSON)
+```
+
+Windows portable package (Node runtime + production deps + art):
+
+```bash
+node scripts/make-windows-bundle.mjs --out <empty-dir> --force
+```
+
+The Android packager is a separate tool and is **not** committed here. It reads a clean `master` worktree, the complete
+v0.3.1 art directory, a JDK/SDK toolchain, and the debug keystore; outputs and caches stay outside the repository.
+Build with `connect` and `arm64-v8a,x86_64`; pass `--version-code 3002`; require `status=success` in
+`build-report.json` and every `checks[].ok` in `apk-verify.json`. Its overlay anchors target upstream 0.3.1; adapt them
+in the packager copy if a 20P UI edit moves an anchor, and re-run the full build. Never edit the reference toolchain or
+complete-art directories in place.
+
+## 7. Current merge state and known limits
+
+- Merge baseline: `abb3c74f`; upstream `c9d804f`; package 0.3.1; release tag `v0.3.1-20p.6`; APK `versionCode 3002`.
+- The merge record lists every conflict category and the post-merge fixes (HEAD ranges, `rawResult`/`yield`, `syncPool`
+  max, runtime URLs in `simLoader`, `slotOf`, unite credited kills, stylesheet order, package counts).
+- Full `npm test`: run it before handoff; the record carries the final pass/fail output. `npm run lint` is expected to
+  report 0 errors (warnings are upstream); `npm run typecheck` and `npm run check:imports` must pass.
+- Not verified here: 20 real players across devices/NAT, the complete official-UI manual pass, and installing the APK
+  on a physical phone/emulator. Do not claim those; use the record's checklist.
+- Local artifacts are evidence, not a deployment. Do not create a GitHub Release, deploy, or push a player package
+  without the current task's explicit authorization.

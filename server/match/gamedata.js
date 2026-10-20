@@ -316,17 +316,18 @@ export class GameData {
    * Copies of a base chess in the shared pool — and, for a DIY slot, of a slotted 自选 piece in its player's own stock
    * (player/diy.js buildDiyStock).
    */
-  poolCopies(baseId) {
+  poolCopiesBase(baseId) {
     const ov = this.economy.poolCopiesOverrides;
     const tier = this.tierOf(baseId);
     const pc = this.economy.poolCopies;
     const v = ov && Number.isInteger(ov[baseId]) && ov[baseId] >= 0 ? ov[baseId] : pc?.[tier];
-    const base = Number.isInteger(v) && v >= 0 ? v : (DEFAULTS.poolCopies[tier] ?? 10);
-    // Co-op doubles the single-player counts: the measured shared pool (shared by the whole team, independent of team
-    // size) and each player's private 自选 stock alike — the maintainer's decision of 2026-10-15 (GitHub #650): with
-    // the shared pool doubled and the 自选 stock not, a 自选 operator was diluted in the copy-weighted rolls.
+    return Number.isInteger(v) && v >= 0 ? v : (DEFAULTS.poolCopies[tier] ?? 10);
+  }
+  poolCopies(baseId) {
+    // Co-op doubles the shared pool (GitHub #650); this fork's private DIY stock uses poolCopiesBase() instead:
+    // D028 keeps each player's 自选 stock at the original amount.
     const multiplier = this.isSolo ? 1 : posIntOr(this.economy.coopPoolMultiplier, 1);
-    return base * multiplier;
+    return this.poolCopiesBase(baseId) * multiplier;
   }
 
   /** Normal equipment copies in the shared pool; effect-only items have no shop stock limit. */

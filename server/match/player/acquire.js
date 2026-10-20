@@ -309,6 +309,8 @@ export class PlayerAcquire {
     const consumed = incoming ? [{ piece: incoming, area: 'new' }] : [];
     for (const l of locs) { if (consumed.length >= need) break; consumed.push(l); }
     if (consumed.length < need) return null;
+    // remember where equipped twins sat: with a full hand AND a full temp the golden item takes the first one's slot
+    const slotOf = consumed.filter((l) => l.area === 'equipped').map((l) => ({ holder: l.holder, idx: l.holder.items.indexOf(l.piece) }));
     for (const l of consumed) if (l.area !== 'new') this._detach(l);
     const golden = this.newPiece('item', rec.upgradeChessId || rec.goldenId, consumed.every((l) => l.piece.noPool) ? { noPool: true } : {});
     if (!this.stow(golden, { allowTemp: true })) {

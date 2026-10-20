@@ -36,6 +36,7 @@ export class InPageSimHost {
   }
   progress() { return this.sim.spec.battleProgress(this.battle); }
   uniteLeft() { return this.sim.spec.uniteLeft(this.battle); }
+  rawResult() { return this.battle ? this.battle.result() : null; }
   compactResult(options) {
     const s = this.sim.spec;
     const r = s.compactResult(this.battle.result());

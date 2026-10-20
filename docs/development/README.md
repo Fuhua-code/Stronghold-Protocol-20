@@ -22,7 +22,22 @@
 
 当前玩法说明继续引用已有的 [PLAYER_CAPACITY.md](../PLAYER_CAPACITY.md)。该文件由本分支在 `90bb5a4` 新增，现有文档已引用它，因此本次保留原位。新记录通过链接引用规则，避免把完整玩法再复制到每篇记录里。
 
-## 当前基线
+## 当前基线（2026-10-21，v0.3.1-20p.6）
+
+| 项目 | 已核实状态 |
+|---|---|
+| 上游目标 | `sganggs/Stronghold-Protocol` `master` `c9d804f`，`package.json` 0.3.1；最新发布 v0.3.1 |
+| 集成提交 | `abb3c74f`（20P 第一父 + 上游第二父）；合并记录 [DEV-20261021-01](records/2026-10-21-01-upstream-v0.3.1.md) |
+| 分支 | 新仓库 `master` 为 20P 集成线；保留 `upstream/master`、`feat/IncreasePlayerCapacity`；旧 fork 名已恢复为 `Fuhua-code/Stronghold-Protocol` |
+| 新仓库 | `Fuhua-code/Stronghold-Protocol-20`，独立镜像（带 LongQianChen 全部分支与标签，不是 GitHub fork 关系） |
+| 上游接纳 | 0.3.0/0.3.1 插件与内容宿主、插件工作台、皮肤、官方特效/3D 场景、新 UI、测试房间、内容哈希 |
+| 保留扩展 | D001–D038：20 人容量、固定分组、并行轮选、分组库存、联防、公告、素材缓存、目录、聊天、紧凑协议、紧急保护 |
+| 发布/部署 | 本地构建 Windows 整合包、素材包与 APK；未创建 GitHub Release、未部署服务器 |
+| 验证 | 见合并记录的完整测试结果；`lint` 0 error、`typecheck`/`imports` 通过；20 真人跨设备/NAT、完整官方 UI、真机 APK 未验证 |
+
+历史 v0.2.6 基线保留在下方，作为当时状态的记录。
+
+## 历史基线（2026-10-14，v0.2.6）
 
 上游核对日期：**2026-10-14，Asia/Shanghai**。v0.2.6 合并任务已通过 fetch 和作者远程引用核实，作者 master 与 fork master 同为 `488db49f11daf862b67ce26fa4cf89aa6cba2466`。这是核对当时的状态，不代表后续远端更新；本次只拉取与读取远程、在本地保留历史合并，未推送、打标签、打发布包或部署。
 

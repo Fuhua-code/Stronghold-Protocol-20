@@ -528,10 +528,12 @@ export function createBattleRunner(deps) {
       let result = null;
       let wire = null;
       try {
+        const raw = typeof e.host.rawResult === 'function' ? e.host.rawResult() : null;
         result = e.host.compactResult({ bossLike: bossLike(e), battleId: e.battleId });
-        const tooManyEntries = result && (Object.keys(result.perPlayer || {}).length > RESULT_LIMITS.players
-          || Object.values(result.perPlayer || {}).some((p) => (p?.leaked?.length || 0) > RESULT_LIMITS.leaked)
-          || (result.unspawned?.length || 0) > RESULT_LIMITS.unspawned);
+        const probe = raw || result;
+        const tooManyEntries = probe && (Object.keys(probe.perPlayer || {}).length > RESULT_LIMITS.players
+          || Object.values(probe.perPlayer || {}).some((p) => (p?.leaked?.length || 0) > RESULT_LIMITS.leaked)
+          || (probe.unspawned?.length || 0) > RESULT_LIMITS.unspawned);
         // The server must see every surviving enemy. A compactResult list cap or an oversized frame would otherwise
         // silently undercharge a leaker, or close the socket at the 64 KB inbound limit.
         wire = tooManyEntries ? null : result;

@@ -1,3 +1,12 @@
+## 0.3.1-20p.6 — 2026-10-21
+
+### 上游同步
+
+- 将 `feat/IncreasePlayerCapacity` 合并到上游 `sganggs/Stronghold-Protocol` `master` `c9d804f`（v0.3.1），接纳 0.3.0/0.3.1 的插件系统、插件工作台、内容/外观插件、皮肤、官方特效与 3D 场景、新界面、测试房间、内容哈希与 match host。
+- 保留 20 人容量（4/8/10/16/20，默认 8）、固定分组卡池与并行轮选、分组装备库存/负债、多轮联防、公告、服主设置、大厅目录、局内聊天、素材预缓存、紧凑协议、运行时缓存与带宽紧急保护。
+- 53 个冲突文件按 [DECISIONS](docs/development/DECISIONS.md) 与 [UPSTREAM](docs/development/UPSTREAM.md) 逐项合并；关键适配见 [合并记录](docs/development/records/2026-10-21-01-upstream-v0.3.1.md)。
+- 发布标签拟为 `v0.3.1-20p.6`；`package.json` 保持 0.3.1（Android 打包器要求稳定 SemVer），APK `versionCode` 3002。
+
 ## 0.3.1 — 2026-10-18
 
 ### 规则

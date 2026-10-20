@@ -31,6 +31,8 @@ export class PlayerPrep {
     const handFull = freeSlot(this.hand) < 0;
     if (slot.kind === 'item') {
       if (!this.gd.item(slot.id)) return fail(ERR.BAD_TARGET);
+      // D034: equipment rewards keep the fixed group's stock check.
+      if (!this.m.itemPoolFor(this).canGain(slot.id)) return fail(ERR.SOLD_OUT);
       // Already displayed equipment rewards survive stock exhaustion (#624, maintainer 2026-10-14).
       if (handFull) return fail(ERR.HAND_FULL);
     } else if (slot.kind === 'chess') {

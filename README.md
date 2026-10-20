@@ -1,6 +1,8 @@
+# 卫戍协议：盟约 · Stronghold Protocol: Alliance
+
 ## 卫戍协议20人版总结
 
-本分支项目由龙千尘基于作者上游原作者项目[sganggs/Stronghold-Protocol](https://github.com/sganggs/Stronghold-Protocol)，将其扩展为最大20人联机版本，并且做了相应网络优化，新功能添加与体验优化。目前同步至0.2.6版本；公共状态最高8Hz，保留20人压缩默认及固定分组玩法。
+本分支项目由龙千尘基于作者上游原作者项目[sganggs/Stronghold-Protocol](https://github.com/sganggs/Stronghold-Protocol)，将其扩展为最大20人联机版本，并且做了相应网络优化，新功能添加与体验优化。本仓库 `Fuhua-code/Stronghold-Protocol-20` 将该扩展同步到上游 v0.3.1，并接纳插件系统、插件工作台、皮肤、官方特效/3D 场景与新界面。当前已同步上游 master（`c9d804f`，v0.3.1）；发布标签为 `v0.3.1-20p.6`；公共状态最高 8 Hz，保留 20 人压缩默认及固定分组玩法。
 
 ### 新增设计
 
@@ -45,7 +47,6 @@
 
 后续此项目将大幅降低更新频率，并且不再大量开发新功能，祝玩的开心
 
-# 卫戍协议：盟约 · Stronghold Protocol: Alliance
 
 《明日方舟》季节性自走棋塔防玩法「卫戍协议：盟约」的**非官方同人复刻**：浏览器即开即玩，单人或最多 20 人联机合作。
 

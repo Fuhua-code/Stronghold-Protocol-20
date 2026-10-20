@@ -44,14 +44,15 @@ function get(port, p, headers = {}, method = 'GET') {
 const until = async (fn, ms = 3000) => { for (const t0 = Date.now(); Date.now() - t0 < ms;) { if (await fn()) return true; await new Promise((r) => setTimeout(r, 20)); } return false; };
 
 describe('the asset index', () => {
-  test('hashes every file under assets/ and fonts/ (dot names skipped, a linked folder followed), persists them, rehashes only what changed', async () => {
+  test('hashes every file under assets/ and fonts/ (dot names skipped, a linked folder followed), persists them, rehashes only what changed', async (t) => {
     const a = randomBytes(2000);
     const b = Buffer.from('atlas text\n'.repeat(50));
     const dir = tree({
       'public/assets/char/a.png': a, 'public/assets/spine/x/x.atlas': b, 'public/assets/.hidden': 'h', 'public/assets/.git/obj': 'o',
       'public/fonts/f.woff2': 'font', 'public/js/app.js': 'not indexed', 'elsewhere/linked/l.png': 'linked',
     });
-    fs.symlinkSync(path.join(dir, 'elsewhere/linked'), path.join(dir, 'public/assets/link'), 'dir');
+    try { fs.symlinkSync(path.join(dir, 'elsewhere/linked'), path.join(dir, 'public/assets/link'), 'dir'); }
+    catch (e) { if (e.code === 'EPERM') { t.skip('symlink creation unavailable (EPERM)'); return; } throw e; }
     const cacheFile = path.join(dir, '.cache/asset-hashes.json');
     try {
       const idx = createAssetIndex({ publicDir: path.join(dir, 'public'), cacheFile, delayMs: 0 });

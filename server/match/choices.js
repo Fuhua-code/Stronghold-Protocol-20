@@ -186,7 +186,7 @@ export function generateGroupDrafts(gd, rng, round, groups, { stageId = null, bo
     if (!draft) continue;
     drafts.push({ id: group.id, ...draft });
   }
-  return drafts;
+  return drafts.length ? drafts : null;
 }
 
 /** Bond granted by a 驰援 tactic card (effect buff single_special_choice_gain_bond_chess), else null. */

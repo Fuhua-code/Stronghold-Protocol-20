@@ -200,7 +200,7 @@ export class PlayerDiy {
       if (!rec || !slot) continue;
       const bonds = Array.isArray(rec.bonds) ? rec.bonds : [];
       if (bonds.length > 0 && bonds.every((b) => off.has(b))) { banned.push(slotId); continue; }
-      const cap = gd.poolCopies(slotId);
+      const cap = gd.poolCopiesBase ? gd.poolCopiesBase(slotId) : gd.poolCopies(slotId);
       if (!(cap > 0)) continue;
       stock.entries.set(slotId, { cap, left: cap, tier: gd.tierOf(slotId), shopLevel: slot.shopLevel });
     }

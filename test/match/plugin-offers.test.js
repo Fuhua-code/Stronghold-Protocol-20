@@ -223,7 +223,7 @@ test('prep hooks follow the official round draw and draft; the draft is never he
   const finish = h.m.finishSpDraft.bind(h.m);
   h.m.finishSpDraft = () => { drafted = true; finish(); };
   h.start();
-  assert.ok(h.run(() => h.m.offerWin.length > 0));
+  assert.ok(h.drive(() => h.m.offerWin.length > 0));
   assert.equal(drafted, true);
   assert.equal(h.m.offerWin[0].round, round);
   assert.equal(h.m.sp, null);
@@ -330,7 +330,7 @@ test('test journal records g.offer/refresh and restores an open window on determ
   const h = makeMatch({ humans: 2, bots: 0, fake: true, test: true, offers,
     log: { info(line) { if (line.startsWith('[test-input ')) entries.push(JSON.parse(line.slice(line.indexOf(']') + 2))); } } });
   h.start();
-  assert.ok(h.run(() => h.m.offerWin.length > 0));
+  assert.ok(h.drive(() => h.m.offerWin.length > 0));
   const w = h.m.offerWin[0];
   h.m.handle('p_0', intent(w, 0, 'g.offerRefresh'));
   h.m.handle('p_1', intent(w));

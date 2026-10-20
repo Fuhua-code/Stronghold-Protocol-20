@@ -131,9 +131,20 @@ export function makeMatch(o = {}) {
   };
   /** drive human decisions (info, band, 机变, ready) until `pred` holds */
   h.drive = (pred, { ready = true, band = 'band_bldsk', maxSteps = 3e6 } = {}) => {
+    const releaseHeldBattleCheck = () => {
+      if (m.test === true && m.phase === 'BATTLE_CHECK' && m._testHeld && typeof m._testHeld.fn === 'function') {
+        const fn = m._testHeld.fn;
+        m._testHeld = null; m._testArmed = null;
+        fn();
+        return true;
+      }
+      return false;
+    };
     for (let i = 0; i < maxSteps; i++) {
       if (pred()) return true;
       if (h.ended) return !!pred();
+      // A test match holds BATTLE_CHECK's timer (testTimers off); reaching PREP in a fixture releases it.
+      if (releaseHeldBattleCheck()) continue;
       for (const ps of m.players.values()) {
         if (ps.isBot || ps.left) continue;
         if (m.phase === 'INFO_CHECK' && !ps.infoReady) m.handle(ps.playerId, { t: 'g.infoReady' });
@@ -153,7 +164,10 @@ export function makeMatch(o = {}) {
         }
       }
       if (pred()) return true;
-      if (!sched.runNext()) return !!pred();
+      if (!sched.runNext()) {
+        if (releaseHeldBattleCheck()) continue;
+        return !!pred();
+      }
     }
     return !!pred();
   };

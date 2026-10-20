@@ -221,7 +221,6 @@ export function ChoiceView({ pub, sp, myId, solo, personal = false, busyIdx = nu
   const mine = sp.pickOf.get(myId);
   const turnName = players.get(sp.turnPid)?.name || t('队友');
   const special = /_s$/.test(String(sp.family || ''));
-  const order = personal || solo ? [] : sp.order;
   const timed = personal ? pub?.deadline > 0 : !solo && !sp.untimed && !sp.done;
   armed = armedCard(armed, sp, { myId, solo, busyIdx });
   const armedCardRec = armed != null ? sp.cards.find((c) => c && c.idx === armed) : null;
@@ -269,20 +268,6 @@ export function ChoiceView({ pub, sp, myId, solo, personal = false, busyIdx = nu
       </nav>` : null}
       ${readonly && grouped ? html`<p class="spov__readonly" role="status">${t('正在查看{group}组，只有本组成员可以选择', { group: sp.label })}
         ${sp.ownGroupId != null ? html`<button type="button" onClick=${() => onGroup(sp.ownGroupId)}>${t('返回本组')}</button>` : null}</p>` : null}
-      ${order.length ? html`<div class=${cx('spov__order', order.length > 8 && 'spov__order--many')} aria-label=${t('决策顺序')}>
-        ${order.map((pid, i) => {
-          const p = players.get(pid);
-          const picked = sp.pickOf.has(pid);
-          const cur = sp.turnPid === pid && !picked;
-          const left = p?.status === 'left';
-          return html`<div key=${pid} class=${cx('spov__who', cur && 'is-cur', picked && 'is-done', pid === myId && 'is-self')}>
-            <span class="spov__idx num">${i + 1}</span>
-            <${PlayerAvatar} player=${p || { name: '?' }} size="sm" self=${pid === myId} />
-            <span class="spov__wname">${p?.name || t('博士')}</span>
-            <span class="spov__wstate">${left ? html`<${Icon} name="exit" />` : picked ? html`<${Icon} name="check" />` : cur ? html`<${Icon} name="hourglass" />` : html`<${Icon} name="dots" />`}</span>
-          </div>`;
-        })}
-      </div>` : null}
       <div class=${cx('spov__grid', sp.cards.length <= 3 && 'spov__grid--3', sp.cards.length > 6 && 'spov__grid--expanded')}
         style=${sp.cards.length > 6 ? `--sp-cols:${Math.min(6, Math.ceil(sp.cards.length / 2))}` : undefined}>
         ${sp.cards.map((card) => {
