@@ -161,6 +161,7 @@ export function uniteRemainingLeaks(plan, result) {
   };
   const take = (q) => {
     if (!q) return null;
+    // loop-cap: q.cursor advances by one per iteration and never passes q.rows.length
     while (q.cursor < q.rows.length && q.rows[q.cursor].used) q.cursor++;
     const row = q.rows[q.cursor++] || null;
     if (row) row.used = true;

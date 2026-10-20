@@ -41,6 +41,9 @@ export class RealScheduler {
     try { return Number(this._now()) || Date.now(); } catch { return Date.now(); }
   }
 
+  /** The same clock without the freeze wrapper; D030 freezes live in FreezeScheduler. */
+  gameNow() { return this.now(); }
+
   _wrap(fn) {
     return () => {
       try { fn(); } catch (e) { if (this._onError) this._onError(e); else console.error('[scheduler] callback threw', e); }
@@ -105,6 +108,7 @@ export class VirtualScheduler {
   }
 
   now() { return this.t; }
+  gameNow() { return this.t; }
 
   _push(fn, ms, every) {
     if (this.disposed || typeof fn !== 'function') return null;

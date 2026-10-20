@@ -3,7 +3,8 @@
 //     MIME types incl. .mjs/.js text/javascript, .skel application/octet-stream, .atlas text/plain;
 //     Brotli/gzip for text-like types, .skel and uncompressed fonts when the client accepts it (small files are
 //     compressed once and cached in memory); content ETag when supplied, else size + mtime; Last-Modified and 304s;
-//     (html & code/data: no-cache + revalidate; public/assets|fonts|vendor: 1 day; asset/font `?v=`: immutable).
+//     (html & code/data: no-cache + revalidate; public/assets|fonts `?v=`: immutable; data/shared `?v=<8hex>`: immutable;
+//     public/assets|fonts|vendor: 1 day).
 //     Verified runtime `?rv=sha256` and asset content-hash paths get immutable policies from their callers.
 //     single byte-range requests (206/416, used by <audio>).
 
@@ -264,7 +265,9 @@ function ifRangeMatches(req, etag, lastModified) {
 
 function cacheControlFor(ext, mountName, segments, query) {
   if (ext === '.html' || ext === '.htm') return 'no-cache';
+  // Public art/font URLs accept any version marker; content data URLs use the 8-hex content version.
   if (mountName === 'public' && ['assets', 'fonts'].includes(segments[0]) && /(^|&)v=/.test(query)) return IMMUTABLE_CACHE;
+  if ((mountName === 'data' || mountName === 'shared') && /(^|&)v=[0-9a-f]{8}(?:&|$)/.test(query)) return IMMUTABLE_CACHE;
   if (mountName === 'public' && segments.length > 1 && LONG_CACHE_DIRS.includes(segments[0])) return LONG_CACHE;
   return 'no-cache';
 }

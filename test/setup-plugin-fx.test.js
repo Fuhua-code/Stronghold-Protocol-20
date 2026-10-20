@@ -4,10 +4,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fxFixture } from './helpers/fxFixtures.js';
+import { NO_SYMLINK } from './helpers/symlinks.js';
 import { installedFxReferences, officialFxReferences } from '../server/plugins/fxReferences.js';
 import { checkPluginFx, pluginFxExtractionAllowed } from '../tools/setup.mjs';
 
-test('setup notices installed official references absent from data/index, without reading scripts or links', t => {
+test('setup notices installed official references absent from data/index, without reading scripts or links', NO_SYMLINK, t => {
   const f = fxFixture(t);
   f.put('plugins/demo/plugin.json', { operators: ['ops.json'], assets: 'assets.json', entry: { sim: 'evil.js' } });
   f.put('plugins/demo/ops.json', [{ fx: { unit: 'char_4217_makoto' } }, { origin: { charId: 'char_9001_test' }, art: { assets: { spine: 'char_9002_test' } } }, { charId: 'char_9003_test' }]);

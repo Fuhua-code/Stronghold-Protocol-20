@@ -50,8 +50,11 @@ The 20-player rules that are easiest to break:
   cards, 50 s strategy turns, 30 s first / 16 s later 机变 turns; cross-group repeats are legal.
 - **D013** unite rounds are capped by the fixed group count (≤ 5), with per-round majority voting.
 - **D009/D036** leader pools scale with living players; pairings are seeded and stay stable from prep to battle.
-- **D029/D034/D035** item stock is per fixed group (five-player groups expand), displayed picks may debt the group,
-  and AI avoidance only considers the same group's living teammates.
+- **D028** each player's private 自选 stock stays 8 / 5 in every mode; upstream 0.3.0's co-op doubling (#650) is not
+  applied to it, although the shared operator pools still double.
+- **D029/D034/D035** item stock is per fixed group (five-player groups expand); displayed operator cards/offers may
+  debt the group, but equipment purchases and rewards keep their stock check (no equipment debt), and AI avoidance only
+  considers the same group's living teammates.
 - **D016/D025/D031/D038** asset cache is explicit and hash-addressed; never add an automatic full-catalog download,
   never delete a player's cache as a repair step, and keep the old-directory update cooldown at 5 s/IP.
 - **D014/D015** announcements are ordinary vs. urgent notices; images are read-only from the announcement store.
@@ -72,7 +75,7 @@ The 20-player rules that are easiest to break:
 | Pools/capacity | `server/match/pool.js`, `shared/playerCapacity.js` | `SharedItemPool` carries both `scale` (five-player groups) and `debt` (displayed picks); `createPoolGroups` uses the fixed layouts. |
 | Protocol | `shared/protocol.js` | `C2S` validators are the wire contract; the fork and upstream fields are merged (capacity/assetCache/chat/discovery plus plugin offers/test rooms/content hashes). `shared/wireCodec.js` / `wireSchema.js` hold compact wire v1. |
 | Deterministic sim | `server/sim/` | plain ESM used by Node and browsers; no Node APIs, wall clock, `Math.random`, or engine-approximated Math (use `detmath.js`). Kits are under `server/sim/content/kits/`. |
-| HTTP | `server/http/files.js`, `static.js`, `routes.js`, `websocket.js`, `assetCache.js` | `serveFile`/`serveBuffer` are the fork's signatures (`serveBuffer(req,res,body,opts)`; HEAD mirrors GET ranges). `static.js` combines the runtime cache (`runtimeCache.js`) with plugin/content/visual routes and the served manifests. |
+| HTTP | `server/http/files.js`, `static.js`, `routes.js`, `websocket.js`, `assetCache.js` | `serveFile`/`serveBuffer` are the fork's signatures (`serveBuffer(req,res,body,opts)`; `Range` applies to GET only, HEAD returns 200 and the full length). `static.js` combines the runtime cache (`runtimeCache.js`) with plugin/content/visual routes and the served manifests. |
 | Client entry | `public/js/main.js` | router `title → lobby → room → game`, store/net wiring, announcement/asset-cache/chat hosts. Screens: `public/js/screens/{lobby,room,game}.js`; match UI: `public/js/ui/{choiceOverlay,teamPanel,hud,shopBar}.js`. |
 | Battle client | `public/js/battle/runner.js` | `InPageSimHost` / `WorkerSimHost` abstraction (`simHost.js`), `simLoader.js`, `simWorker*.js`; the 20P additions are `rawResult()` and `syncPool(hp, acked, max)`. |
 | Asset cache | `server/assetCacheCatalog.js`, `server/http/assetCache.js`, `shared/assetCache.js`, `public/js/assetCache.js`, `public/asset-cache-sw.js` | the fork's manager and upstream's imported-art helpers share `public/js/assetCache.js`; keep both export sets. |
@@ -152,8 +155,12 @@ complete-art directories in place.
 - Merge baseline: `abb3c74f`; upstream `c9d804f`; package 0.3.1; release tag `v0.3.1-20p.6`; APK `versionCode 3002`.
 - The merge record lists every conflict category and the post-merge fixes (HEAD ranges, `rawResult`/`yield`, `syncPool`
   max, runtime URLs in `simLoader`, `slotOf`, unite credited kills, stylesheet order, package counts).
-- Full `npm test`: run it before handoff; the record carries the final pass/fail output. `npm run lint` is expected to
-  report 0 errors (warnings are upstream); `npm run typecheck` and `npm run check:imports` must pass.
+- Full `npm test` (2026-10-21): 9,395 tests — 9,304 pass, 10 fail, 81 skipped. The 10 are load-sensitive timing tests
+  (wire-pressure, heavy-field performance, script-sandbox / probe timeouts); each passes when run alone. 17 Windows
+  symlink tests skip when Developer Mode is off. `npm run lint` reports 0 errors (537 upstream warnings); `npm run
+  typecheck`, `npm run check:imports`, i18n strict and the docs tests pass.
+- Forge imports use a directory junction for their validation view on Windows, so they work without Developer Mode;
+  the security tests that must create real symlinks skip there.
 - Not verified here: 20 real players across devices/NAT, the complete official-UI manual pass, and installing the APK
   on a physical phone/emulator. Do not claim those; use the record's checklist.
 - Local artifacts are evidence, not a deployment. Do not create a GitHub Release, deploy, or push a player package

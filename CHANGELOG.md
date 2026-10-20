@@ -5,7 +5,9 @@
 - 将 `feat/IncreasePlayerCapacity` 合并到上游 `sganggs/Stronghold-Protocol` `master` `c9d804f`（v0.3.1），接纳 0.3.0/0.3.1 的插件系统、插件工作台、内容/外观插件、皮肤、官方特效与 3D 场景、新界面、测试房间、内容哈希与 match host。
 - 保留 20 人容量（4/8/10/16/20，默认 8）、固定分组卡池与并行轮选、分组装备库存/负债、多轮联防、公告、服主设置、大厅目录、局内聊天、素材预缓存、紧凑协议、运行时缓存与带宽紧急保护。
 - 53 个冲突文件按 [DECISIONS](docs/development/DECISIONS.md) 与 [UPSTREAM](docs/development/UPSTREAM.md) 逐项合并；关键适配见 [合并记录](docs/development/records/2026-10-21-01-upstream-v0.3.1.md)。
-- 发布标签拟为 `v0.3.1-20p.6`；`package.json` 保持 0.3.1（Android 打包器要求稳定 SemVer），APK `versionCode` 3002。
+- 明确保留两项 20P 规则：私有自选库存不随联机/五人组扩容（D028，上游 #650 的翻倍只用于共享池）；已展示干员可负债领取，但装备购买/奖励仍做库存检查（D034，不沿用上游 #624 的装备负债）。
+- 修复合并后的 HTTP 数据 URL `?v=` 缓存、插件消息把 `lobby.*` 当作意图拦截、真实调度器的截止时钟，以及 Forge 在 Windows 无符号链接权限时的校验视图（改用 junction）。
+- 发布标签为 `v0.3.1-20p.6`；`package.json` 保持 0.3.1（Android 打包器要求稳定 SemVer），APK `versionCode` 3002。
 
 ## 0.3.1 — 2026-10-18
 

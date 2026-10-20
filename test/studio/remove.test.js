@@ -6,6 +6,7 @@
 // also when some or all are refused; the request needs the studio's key (the 404 page without the header, 403 with a
 // wrong key) and a list it can read; the page hears the removed ids (the change event of the hot reload).
 import { test, describe, before, after } from 'node:test';
+import { NO_SYMLINK } from '../helpers/symlinks.js';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -94,7 +95,7 @@ describe('removing plugins in the studio', () => {
     assert.equal(info.limits.removeMax, REMOVE_MAX);
   });
 
-  test('refused one by one, the others removed — an invalid id, a missing folder, another case of a name, a "_" or dot folder, a symbolic link: 200 with each code, nothing of them touched', async () => {
+  test('refused one by one, the others removed — an invalid id, a missing folder, another case of a name, a "_" or dot folder, a symbolic link: 200 with each code, nothing of them touched', NO_SYMLINK, async () => {
     fs.mkdirSync(path.join(plugins, '_keep'));
     fs.writeFileSync(path.join(plugins, '_keep', 'notes.txt'), 'x');
     fs.mkdirSync(path.join(plugins, '.hidden'));
@@ -171,7 +172,7 @@ describe('removing plugins in the studio', () => {
     assert.ok(fs.existsSync(path.join(plugins, 'stuck-skin', 'plugin.json')));
   });
 
-  test('a move that fails is refused alone (PLUGIN_STUDIO_REMOVE): plugins/_removed a symbolic link is never written through', async () => {
+  test('a move that fails is refused alone (PLUGIN_STUDIO_REMOVE): plugins/_removed a symbolic link is never written through', NO_SYMLINK, async () => {
     const removed = path.join(plugins, '_removed');
     const kept = path.join(tmp, 'removed-kept');
     const elsewhere = path.join(tmp, 'elsewhere');

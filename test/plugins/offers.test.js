@@ -7,6 +7,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { NO_SYMLINK } from '../helpers/symlinks.js';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -252,7 +253,7 @@ test('registry reads and hashes both the declaration and transitive option sourc
   assert.deepEqual(a.offers[0].cards[0].effect, { funds: 3 }, 'old snapshot stays immutable');
 });
 
-test('registry rejects invalid option payloads, scripts, missing sources and escaping links', t => {
+test('registry rejects invalid option payloads, scripts, missing sources and escaping links', NO_SYMLINK, t => {
   for (const cards of [[], [{ id: 'a' }], Array(129).fill({ id: 'a' }),
     ['a', 'b', 'c'].map(id => ({ id, name: id, desc: 'Grant', icon: 'https://invalid.test/image', apply: { funds: 1 } }))]) {
     const r = readPluginFolder(offerFolder(t, { cards }));

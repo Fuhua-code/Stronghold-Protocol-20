@@ -50,14 +50,15 @@ test('a duplicate draft card becomes unavailable when the preceding player exhau
   assert.equal(cardPickable({ turnPid: 'p_1', pickOf: new Map() }, card, { myId: 'p_1', solo: false }), false);
   assert.ok(m.pickCard(b, 2).ok); m.dispose();
 });
-test('measured operator capacities and exceptions: co-op doubles shared stock and each player\'s private 自选 stock (#650)', () => {
+test('measured operator capacities and exceptions: co-op doubles shared stock; the private 自选 stock keeps the base amount (D028)', () => {
   const solo = new GameData(DATA, 'mode_single_normal'), coop = new GameData(DATA, 'mode_multi_normal');
   for (const [name, n] of [['普罗旺斯', 10], ['跃跃', 10], ['风丸', 8], ['蒂比', 12], ['哈洛德', 14], ['缪尔赛思', 5]]) {
     assert.equal(solo.poolCopies(byName(name)), n, name); assert.equal(coop.poolCopies(byName(name)), 2 * n, name);
   }
-  // the maintainer's decision of 2026-10-15 (GitHub #650): the 自选 stock doubles too, or a 自选 operator is diluted
+  // D028: GameData.poolCopies doubles for the shared operators, but the private 自选 stock is built from the base.
   for (const [slot, n] of [['chess_char_5_diy1_a', 8], ['chess_char_5_diy2_a', 8], ['chess_char_6_diy1_a', 5], ['chess_char_6_diy2_a', 5]]) {
     assert.equal(solo.poolCopies(slot), n, slot); assert.equal(coop.poolCopies(slot), 2 * n, slot);
+    assert.equal(solo.poolCopiesBase(slot), n, slot); assert.equal(coop.poolCopiesBase(slot), n, slot);
   }
   assert.equal(solo.itemPoolCopies(PACK), 2); assert.equal(coop.itemPoolCopies(PACK), 2);
 });
@@ -97,7 +98,7 @@ test('shared equipment occupancy includes hand/equipped/elite, never displayed o
   checkInvariants(m); m.dispose();
 });
 
-test('already displayed equipment stays buyable after stock runs out; release repays the debt first', () => {
+test('exhausted equipment refuses an already displayed purchase and reward, then recovers when copies are released (D034)', () => {
   const h = makeMatch({ mode: 'coop', humans: 2, seed: 11, fake: true }).start().toPrep();
   const m = h.m, a = h.ps('p_0'), b = h.ps('p_1');
   assert.equal(m.itemPool.cap(PACK), 2);
@@ -115,75 +116,43 @@ test('already displayed equipment stays buyable after stock runs out; release re
   assert.equal(m.itemPool.left(PACK), 0);
   assert.equal(m.itemPool.debtOf(PACK), 0);
   const funds = a.funds;
-  assert.ok(a.buy(slotA).ok, 'the displayed shop card stays purchasable');
-  assert.equal(a.funds, funds - 1);
-  assert.equal(a.shop.slots[slotA].sold, true);
-  assert.equal(a.buy(slotA).error, 'SOLD_OUT', 'the same card cannot be bought twice');
-  assert.equal(a.funds, funds - 1);
-  assert.equal(m.itemPool.debtOf(PACK), 1);
-  assert.equal(m.itemPool.rawLeft(PACK), -1);
-  assert.equal(m.itemPool.left(PACK), 0);
-  const normal = [...a.hand, ...a.temp].find((p) => p && m.gd.baseIdOf(p.id) === PACK);
-  assert.ok(normal && !m.gd.isGolden(normal.id));
-  assert.equal(a.upgradeItem(normal), false, '整备 stays limited once nothing is free');
-  assert.equal(m.gd.isGolden(normal.id), false);
-  assert.equal(a.acquireItem(PACK), null, 'a random grant is still refused');
-  assert.equal(m.itemPool.debtOf(PACK), 1);
-  assert.ok(a.pickReward(0).ok, 'the displayed reward stays claimable');
-  assert.equal(a.offers.length, 0);
-  // The reward completes a's pair, so the two normals become one golden: occupancy +1, the same as the incoming need.
-  assert.equal(m.itemPool.debtOf(PACK), 2);
-  assert.equal(m.itemPool.held(PACK), 4);
-  assert.equal(m.itemPool.left(PACK), 0);
-  checkInvariants(m);
+  assert.equal(a.buy(slotA).error, 'SOLD_OUT', 'D034: equipment does not use the displayed-card debt');
+  assert.equal(a.funds, funds);
+  assert.equal(a.shop.slots[slotA].sold, false);
+  assert.equal(a.pickReward(0).error, 'SOLD_OUT', 'the displayed equipment reward is gated too');
+  assert.equal(a.offers.length, 1);
+  assert.equal(m.itemPool.debtOf(PACK), 0);
+  assert.equal(m.itemPool.rawLeft(PACK), 0);
+  assert.equal(a.acquireItem(PACK), null, 'a random grant is refused');
+  assert.equal(m.itemPool.debtOf(PACK), 0);
   for (let i = 0; i < 40; i++) {
     assert.notEqual(m.pool.rollItem(m.rngShop, 6, m.itemPool), PACK);
     assert.notEqual(m.rollItemId({ pool: 'pool_equip_normal', shopLevel: 6 }), PACK);
   }
   const beforeB = b.funds;
-  assert.ok(b.buy(slotB).ok, 'the other player\'s displayed card is its own purchase');
-  assert.equal(b.funds, beforeB - 1);
-  assert.equal(b.buy(slotB).error, 'SOLD_OUT');
-  // b already holds the golden, so this normal does not merge.
-  assert.equal(m.itemPool.debtOf(PACK), 3);
-  assert.equal(m.itemPool.held(PACK), 5);
-  checkInvariants(m);
-  const carrierId = [...m.pool.entries.keys()].find((id) => m.gd.tierOf(id) === 1);
-  const carrier = give(m, b, carrierId);
-  const worn = [...b.hand, ...b.temp].find((p) => p && p.kind === 'item' && !m.gd.isGolden(p.id) && m.gd.baseIdOf(p.id) === PACK);
-  assert.ok(b.equip(worn.uid, carrier.uid).ok);
-  assert.equal(m.itemPool.debtOf(PACK), 3, 'equipping moves the copy; it does not repay');
-  assert.ok(b.sell(carrier.uid).ok);
-  assert.equal(m.itemPool.held(PACK), 5, 'selling returns equipment to the hand');
-  assert.equal(m.itemPool.debtOf(PACK), 3);
-  const returned = [...b.hand, ...b.temp].find((p) => p && p.kind === 'item' && !m.gd.isGolden(p.id) && m.gd.baseIdOf(p.id) === PACK);
-  const tempAt = b.temp.findIndex((p) => p == null);
-  assert.ok(tempAt >= 0);
-  const handAt = b.hand.indexOf(returned);
-  assert.ok(handAt >= 0);
-  b.hand[handAt] = null;
-  b._putTemp(tempAt, returned);
-  b.resolveTemp();
-  assert.equal(m.itemPool.debtOf(PACK), 2, 'a temp wipe repays one copy and leaves the rest of the debt');
-  assert.equal(m.itemPool.held(PACK), 4);
-  assert.equal(m.itemPool.left(PACK), 0);
-  checkInvariants(m);
-  const aGold = [...a.hand, ...a.temp].find((p) => p && m.gd.isGolden(p.id) && m.gd.baseIdOf(p.id) === PACK);
-  assert.ok(a.destroy(aGold.uid).ok);
-  assert.equal(m.itemPool.debtOf(PACK), 0);
-  assert.equal(m.itemPool.held(PACK), 2);
-  assert.equal(m.itemPool.left(PACK), 0, 'stock stays empty until the debt is cleared and a copy is actually free');
-  checkInvariants(m);
-  b.eliminate(1);
-  assert.equal(m.itemPool.debtOf(PACK), 0);
-  assert.equal(m.itemPool.held(PACK), 0);
+  assert.equal(b.buy(slotB).error, 'SOLD_OUT', 'the other player\'s displayed card is gated by the same group stock');
+  assert.equal(b.funds, beforeB);
+  assert.equal(b.shop.slots[slotB].sold, false);
+  // Release both copies: the displayed card and the reward work again, still without debt.
+  const bGold = [...b.hand, ...b.temp].find((p) => p && m.gd.isGolden(p.id) && m.gd.baseIdOf(p.id) === PACK);
+  assert.ok(bGold);
+  assert.ok(b.destroy(bGold.uid).ok);
   assert.equal(m.itemPool.left(PACK), 2);
-  assert.equal(m.itemPool.canGain(PACK), true);
+  assert.equal(m.itemPool.debtOf(PACK), 0);
+  assert.ok(a.buy(slotA).ok, 'stock is back: the displayed card is purchasable');
+  assert.equal(a.funds, funds - 1);
+  assert.equal(m.itemPool.left(PACK), 1);
+  assert.equal(m.itemPool.held(PACK), 1);
+  assert.ok(a.pickReward(0).ok, 'and the displayed reward is claimable');
+  assert.equal(a.offers.length, 0);
+  assert.equal(m.itemPool.left(PACK), 0);
+  assert.equal(m.itemPool.held(PACK), 2);
+  assert.equal(m.itemPool.debtOf(PACK), 0);
   checkInvariants(m);
   m.dispose();
 });
 
-test('a displayed golden reward records only the copies that did not fit', () => {
+test('a displayed golden reward stays refused while its two copies are not free (D034)', () => {
   const h = makeMatch({ mode: 'coop', humans: 2, seed: 11, fake: true }).start().toPrep();
   const m = h.m, a = h.ps('p_0'), b = h.ps('p_1');
   const gold = m.gd.item(PACK).goldenId || m.gd.item(PACK).upgradeChessId;
@@ -192,10 +161,21 @@ test('a displayed golden reward records only the copies that did not fit', () =>
   assert.ok(a.pushItemOffer([gold]), 'a golden still fits while both copies are free');
   assert.ok(b.acquireItem(PACK));
   assert.equal(m.itemPool.left(PACK), 1);
-  assert.ok(a.pickReward(0).ok);
-  assert.equal(m.itemPool.debtOf(PACK), 1);
-  assert.equal(m.itemPool.held(PACK), 3);
+  assert.equal(a.pickReward(0).error, 'SOLD_OUT', 'one copy short: the equipment reward is refused');
+  assert.equal(a.offers.length, 1);
+  assert.equal(m.itemPool.debtOf(PACK), 0);
+  assert.equal(m.itemPool.held(PACK), 1);
+  assert.ok(b.acquireItem(PACK));
   assert.equal(m.itemPool.left(PACK), 0);
+  assert.equal(a.pickReward(0).error, 'SOLD_OUT', 'still no free copies');
+  const bGold = [...b.hand, ...b.temp].find((p) => p && m.gd.isGolden(p.id) && m.gd.baseIdOf(p.id) === PACK);
+  assert.ok(bGold);
+  assert.ok(b.destroy(bGold.uid).ok);
+  assert.equal(m.itemPool.left(PACK), 2);
+  assert.ok(a.pickReward(0).ok, 'two copies free again: the golden is claimable');
+  assert.equal(m.itemPool.held(PACK), 2);
+  assert.equal(m.itemPool.left(PACK), 0);
+  assert.equal(m.itemPool.debtOf(PACK), 0);
   checkInvariants(m);
   m.dispose();
 });
@@ -327,3 +307,4 @@ test('noPool cannot exempt an ordinary item, and fixed golden inheritance keeps 
   checkInvariants(m);
   m.dispose();
 });
+

@@ -267,7 +267,8 @@ export class PlayerAcquire {
    * [ASSUMED] every prep-end item grant, not only Victoria's hammer (owner's decision 2026-10-04).
    * `displayed` (a shop slot or a reward offer already on screen, #624): skip the stock refusal and, once the piece
    * is actually kept, record the copies that did not fit (`need` minus `left` before the gain). A failed stow or
-   * merge records nothing. Fixed gift families stay unlimited without a debt entry. Every other grant still refuses.
+   * merge records nothing. Fixed gift families stay unlimited without a debt entry. D034 keeps equipment buy/reward
+   * paths stock-checked, so they only pass `displayed` while the pool can gain; other callers still refuse.
    */
   acquireItem(itemId, { source = 'grant', toTemp = false, silent = false, deferMerge = false, requirePool = true, noPool = false, displayed = false } = {}) {
     const rec = this.gd.item(itemId);

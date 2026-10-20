@@ -9,6 +9,7 @@
 //     old file removed), a reference, a slot emptied, the coded findings, a one-click fix, the preview composition (a
 //     draft too, a model not packed yet), pack and a deterministic zip, the list.
 import { test, describe, before, after } from 'node:test';
+import { NO_SYMLINK } from '../helpers/symlinks.js';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -70,7 +71,7 @@ test('gate: loopback and private networks with a local Host name; a public clien
   assert.equal(isStudioChange({ headers: { host: 'localhost:3000', 'x-sp-studio': '1', 'sec-fetch-site': 'cross-site' } }), false);
 });
 
-test('files: confined to plugins/<id>/ — ids, paths, links, types, sizes; a write is atomic', () => {
+test('files: confined to plugins/<id>/ — ids, paths, links, types, sizes; a write is atomic', NO_SYMLINK, () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-studio-files-'));
   try {
     const plugins = path.join(dir, 'plugins');
@@ -356,7 +357,7 @@ describe('the studio over HTTP', () => {
     assert.equal(fs.existsSync(path.join(tmp, 'x.png')), false);
   });
 
-  test('links put into a plugin folder by hand: nothing is read or written through them (plugin.json, an overlay file, the lock, the studio\'s note, plugins/_moved)', async () => {
+  test('links put into a plugin folder by hand: nothing is read or written through them (plugin.json, an overlay file, the lock, the studio\'s note, plugins/_moved)', NO_SYMLINK, async () => {
     const outside = path.join(tmp, 'outside');
     fs.mkdirSync(outside, { recursive: true });
     const SECRET = '{"name":"SECRET-NAME","chars":"SECRET-VALUE"}';
@@ -413,7 +414,7 @@ describe('the studio over HTTP', () => {
     assert.deepEqual(fs.readdirSync(outside).sort(), ['secret.json', 'victim.txt']);
   });
 
-  test('files a plugin folder holds are served sandboxed and only of the types the studio writes (no page or script put there by hand); HEAD answers like GET', async () => {
+  test('files a plugin folder holds are served sandboxed and only of the types the studio writes (no page or script put there by hand); HEAD answers like GET', NO_SYMLINK, async () => {
     const dir = path.join(plugins, 'lnk-files');
     fs.writeFileSync(path.join(dir, 'page.html'), '<script>alert(1)</script>');
     fs.writeFileSync(path.join(dir, 'pic.svg'), '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>');
@@ -434,7 +435,7 @@ describe('the studio over HTTP', () => {
     assert.deepEqual([hz.status, hz.text], [200, ''], 'HEAD of the zip builds none');
   });
 
-  test('a plugin folder that is itself a link: the studio never opens it (403 for every read and change, with the key or without; listed apart, nothing of the target sent); the game may still load it and serves only the files its overlay names', async () => {
+  test('a plugin folder that is itself a link: the studio never opens it (403 for every read and change, with the key or without; listed apart, nothing of the target sent); the game may still load it and serves only the files its overlay names', NO_SYMLINK, async () => {
     const target = path.join(tmp, 'linked-target');
     writePlugin(target, cosmetic({ assets: { chars: { char_102_texas: { avatar: 'a.png' } } } }), { 'a.png': png(4, 4, [9, 9, 9, 255]), 'secret.json': '{"s":"LEAK-JSON"}', 'notes.txt': 'LEAK-TXT' });
     const before = fs.readdirSync(target).sort();
@@ -501,7 +502,7 @@ describe('the studio over HTTP', () => {
     } finally { for (const o of open) o.ctl.abort(); }
   });
 
-  test('the key (server/studio/key.js): a change without it is refused whatever the address; reads need none; info tells the page; the same key after a restart, printed with the studio\'s address', async () => {
+  test('the key (server/studio/key.js): a change without it is refused whatever the address; reads need none; info tells the page; the same key after a restart, printed with the studio\'s address', NO_SYMLINK, async () => {
     assert.match(KEY, /^[A-Za-z0-9_-]{22}$/);
     const file = path.join(plugins, '.studio-key');
     assert.equal(fs.readFileSync(file, 'utf8').trim(), KEY, 'kept in plugins/.studio-key');

@@ -110,7 +110,7 @@ Top level: `{ season, seasonName, modes, economy, lpCapPerRound, bossOvertimeAft
 | `itemSellable`, `itemDestroyRefund` | `false`, `0` | items can only be destroyed |
 | `benchSize`, `tempSize`, `deployCap`, `storeCntMax` | `10`, `5`, `8`, `6` | |
 | `equipPerChess`, `maxArtsPerRound` | `2`, `2` | |
-| `poolCopies[tier]` + `poolCopiesOverrides` | 12/14/18/16/8/5 plus measured low-tier identity exceptions (DESIGN §29.8) | single-player copies; `coopPoolMultiplier: 2` doubles them in co-op: the shared operators and each player's private 自选 stock alike (the maintainer's decision of 2026-10-15, GitHub #650, DESIGN §32.14.31; before 0.3.0 the 自选 stock stayed 8 / 5) |
+| `poolCopies[tier]` + `poolCopiesOverrides` | 12/14/18/16/8/5 plus measured low-tier identity exceptions (DESIGN §29.8) | single-player copies; `coopPoolMultiplier: 2` doubles the shared operators in co-op; this fork's private 自选 stock stays 8 / 5 in every mode (D028, `poolCopiesBase`), although upstream 0.3.0 doubles it too (GitHub #650, DESIGN §32.14.31) |
 | `itemPoolCopies[tier]` + `itemPoolCopiesOverrides` | 4/6/7/8/7/3 plus eight measured exceptions (DESIGN §29.8) | shared shop-equipment ownership: normal 1, upgraded 2; non-shop effect-only equipment unlimited |
 | `goldenCopies`, `mergeCount`, `mergeCountOverrides`, `itemMergeCount` | `3`, `3`, `{"chess_char_2_11_a":2}` (风丸), `2` | |
 | `rewardOffer` | `{"count":3,"tierOffset":1,"maxTier":6,"price":0,…}` | merge reward: 3 **different** free chess of tier `min(shopLevel+1,6)` (a short tier tops up from the tier below; the player's stocked 自选 of that tier joins the roll, DESIGN §30.23; `PlayerState.pushRewardOffer`, user playtest #6 item 19) |
@@ -649,8 +649,8 @@ prototype. Built by `tools/build-data.mjs buildBackups`; `shared/standIn.js` com
 `shared/diy.js` adds the 自选 rules on top. The sim fields both (docs/SIM.md §12). Played since 0.2.0: the player fills
 the four slots on the 自选编队 tab (`room.diy { picks }`, docs/PLAYING.md §3; shared/protocol.js checkDiyPicks keeps the
 legal picks), the match takes the picks the seat had at its start (`PlayerState.diy`), and each slotted piece is sold in
-that player's shop only — its own stock (the tier's pool copies, 8 / 5 [ASSUMED], twice that in co-op like the shared
-pool — DESIGN §32.14.31). The ordinary shop draws it from the 调度中心 level `shopLevel`; the promotion reward draws 自选
+that player's shop only — its own stock (the tier's pool copies, 8 / 5 [ASSUMED], unchanged in co-op and five-player
+groups by D028 — DESIGN §32.14.31). The ordinary shop draws it from the 调度中心 level `shopLevel`; the promotion reward draws 自选
 of the reward tier, one shop level earlier (DESIGN §30.23).
 It has no stock when every bond of it is banned this match, and it is the operator for every rule of that player (its data view:
 server/match/player/diy.js, docs/META.md §3). The rules in the data (activity_table act2autochess `charShopChessDatas`; PRTS 卫戍协议, 卫戍协议：盟约

@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fixture } from '../helpers/contentFixtures.js';
+import { NO_SYMLINK } from '../helpers/symlinks.js';
 import { createPlugin, templateById, TEMPLATES, manifestText } from '../../server/studio/templates/index.js';
 import { createPluginFiles } from '../../server/studio/files.js';
 import { createAuthoring } from '../../server/studio/authoring.js';
@@ -81,7 +82,7 @@ test('numeric fields mirror default skills; wizard revision protects external ed
 });
 
 
-test('generated script harness runs with tools/plugin.mjs test, with SDK registrations preloaded', { timeout: 30000 }, t => {
+test('generated script harness runs with tools/plugin.mjs test, with SDK registrations preloaded', { timeout: 30000, ...NO_SYMLINK }, t => {
   const f = fixture(t); makePlugin(f, 'script', 'harness-demo');
   for (const name of ['data', 'test', 'server', 'shared']) fs.symlinkSync(path.resolve(name), path.join(f.dir, name));
   const run = spawnSync(process.execPath, ['tools/plugin.mjs', 'test', 'harness-demo', '--root', f.dir], { encoding: 'utf8', timeout: 25000 });

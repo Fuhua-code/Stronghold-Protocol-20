@@ -6,6 +6,7 @@
 // host is told as in P1a (one toast, the panel's 「重新应用」). A server whose studio was never opened keeps P1a's behaviour.
 // The studio's page hears the change (server-sent events, the ids that changed).
 import { test, describe, before, after } from 'node:test';
+import { NO_SYMLINK } from '../helpers/symlinks.js';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -45,7 +46,7 @@ test('the watch: a change in a plugin folder → one rescan after the quiet time
   } finally { w.stop(); fs.rmSync(dir, { recursive: true, force: true }); }
 });
 
-test('the watch: a plugins folder over the entry limit is not watched as a tree (links not followed in the count)', () => {
+test('the watch: a plugins folder over the entry limit is not watched as a tree (links not followed in the count)', NO_SYMLINK, () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-watch-big-'));
   const plugins = path.join(dir, 'plugins');
   writePlugin(path.join(plugins, 'skin'), cosmetic({ assets: { chars: { char_102_texas: { avatar: 'a.png' } } } }), { 'a.png': png(2, 2) });

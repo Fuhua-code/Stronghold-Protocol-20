@@ -1,4 +1,5 @@
 import {test} from 'node:test';
+import {NO_SYMLINK} from '../helpers/symlinks.js';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -80,7 +81,7 @@ test('trusted activate routes, immutable lobby copies and health run in a child'
  const response=await new Promise(resolve=>{runtime.route({url:'/x/service/status',method:'GET'},{writeHead(){},end:body=>resolve(JSON.parse(body))});});
  assert.deepEqual(response,{joined:1});assert.deepEqual(runtime.health.service,{joined:1});
 });
-test('CLI test runs the template harness with composed data',t=>{
+test('CLI test runs the template harness with composed data',NO_SYMLINK,t=>{
  const f=scriptFixture(t);const dir=template(f);
  fs.mkdirSync(path.join(dir,'test'));let source=fs.readFileSync('plugins/_template/script/test/guard.test.js','utf8');
  source=source.replace('../../../test/helpers/battleHarness.js',pathToFileURL(path.join(ROOT,'test/helpers/battleHarness.js')).href);

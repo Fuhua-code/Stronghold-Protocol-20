@@ -31,15 +31,14 @@ export class PlayerPrep {
     const handFull = freeSlot(this.hand) < 0;
     if (slot.kind === 'item') {
       if (!this.gd.item(slot.id)) return fail(ERR.BAD_TARGET);
-      // D034: equipment rewards keep the fixed group's stock check.
+      // D034: equipment rewards keep the fixed group's stock check; displayed equipment does not create debt.
       if (!this.m.itemPoolFor(this).canGain(slot.id)) return fail(ERR.SOLD_OUT);
-      // Already displayed equipment rewards survive stock exhaustion (#624, maintainer 2026-10-14).
       if (handFull) return fail(ERR.HAND_FULL);
     } else if (slot.kind === 'chess') {
       const rec = this.gd.chess(slot.id);
       if (!rec || (rec.isDiy && !rec.diyFor)) return fail(ERR.BAD_TARGET);
       // Owner decision 2026-10-11 (#498): already displayed operator rewards survive stock exhaustion.
-      // acquireChess records the deficit. Displayed item rewards do the same (acquireItem displayed).
+      // acquireChess records the deficit; equipment rewards are gated above (D034).
       if (handFull) return fail(ERR.HAND_FULL);
     } else return fail(ERR.BAD_TARGET);
     const price = Number.isFinite(slot.price) && slot.price > 0 ? Math.trunc(slot.price) : 0;

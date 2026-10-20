@@ -613,8 +613,8 @@ Any `choice:` handler whose EffectRef reuses its own key must guard like this (o
   (bondsMeta: BOARD / BOARD_AND_DECK distinct pieces, 煌's 炎 + 维多利亚, 绝技 elites), 特质 / meta effects (`makeCtx`
   hands handlers the player's view), placement and summon ranges, the AI 托管 evaluation (bot.js), names in toasts and
   tickers — sees the operator; a player without picks keeps the match's GameData itself. Each slotted piece has its own
-  stock (`ps.diyStock`: `poolCopies` of the slot's tier, 8 / 5 [ASSUMED], doubled in co-op by `coopPoolMultiplier` like
-  the shared pool — 16 / 10, GitHub #650, DESIGN §32.14.31; none — `diyBanned` — when every bond of it is off this
+  stock (`ps.diyStock`: `poolCopiesBase` of the slot's tier, 8 / 5 [ASSUMED], not doubled in co-op — D028 keeps the
+  private stock unscaled, while upstream 0.3.0 doubles it (GitHub #650, DESIGN §32.14.31); none — `diyBanned` — when every bond of it is off this
   match; `initDiyStock` once the bans are drawn); `poolOf(baseId)` routes its copy accounting (buy, reward
   picks, merges, promotions, sells, temp, elimination; `invariants.js` checks `left + held = cap` per player). The
   shop's chess slots roll it with the shared pool (`pool.roll({ extra: diyRollEntries() })`, copy-weighted like any
@@ -1019,12 +1019,11 @@ revives, leaks and deaths without an attributable allied killer add no credit.
 
 `SharedItemPool` derives equipment availability from current ownership across all players: ordinary 1, upgraded 2.
 Equips, merges and returns cannot lose reservations. Consumptions/destruction release ownership [ASSUMED removal
-interpretation]. Shop and reward displays reserve nothing. An equipment card already on screen (a shop slot, or a
-reward offer such as 定向投放 / 见者有份) stays purchasable after `left` hits 0 and records `debt` for the copies that
-did not fit (#624, the maintainer's decision of 2026-10-14; `acquireItem(..., { displayed: true })`). `left` stays
-clamped at 0, so later rolls and `canGain` still skip an empty item until the debt is repaid and a copy is free.
-Destroying, consuming, a temp wipe and elimination repay that debt first. Selling a carrier returns equipment to the
-hand and does not repay. 整备 upgrades the purchased item only when `left` still has the golden's second copy;
+interpretation]. Shop and reward displays reserve nothing. An exhausted equipment card or reward is refused
+(`SOLD_OUT`): D034 keeps the stock check for equipment, so `acquireItem(..., { displayed: true })` creates no debt.
+`left` stays clamped at 0. Operators keep the displayed-card relaxation (a negative raw left, repaid first when a copy
+leaves). Destroying, consuming, a temp wipe and elimination release equipment. Selling a carrier returns equipment to
+the hand. 整备 upgrades the purchased item only when `left` still has the golden's second copy;
 otherwise the item stays normal and the charge remains. A random grant is still refused.
 `m.public.sp.cards[].soldOut` disables a 机变 item card when a preceding choice used the final copy; timer/bot choices
 use the same availability. Those cards are not already-shown shop or reward cards, so they stay stock-limited.

@@ -28,7 +28,7 @@ function invoke(handle, url) {
   return new Promise(resolve => {
     let status;
     handle({url,method:'GET',headers:{},socket:{remoteAddress:'127.0.0.1'}},{
-      setHeader(){},writeHead:s => {status=s;},end:b => resolve({status,body:String(b)}),
+      setHeader(){},once(){},off(){},writeHead:s => {status=s;},end:b => resolve({status,body:String(b)}),
     });
   });
 }

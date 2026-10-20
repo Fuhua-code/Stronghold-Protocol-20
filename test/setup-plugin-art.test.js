@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fxFixture } from './helpers/fxFixtures.js';
+import { NO_SYMLINK } from './helpers/symlinks.js';
 import { installedArtReferences } from '../server/plugins/artReferences.js';
 import { installedFxReferences } from '../server/plugins/fxReferences.js';
 import { checkPluginArt, pluginFxExtractionAllowed } from '../tools/setup.mjs';
@@ -25,7 +26,7 @@ function fixture(t) {
   return f;
 }
 
-test('operator discovery reuses W5 references, excludes the shipped roster, and never loads scripts/links', t => {
+test('operator discovery reuses W5 references, excludes the shipped roster, and never loads scripts/links', NO_SYMLINK, t => {
   const f = fixture(t), ids = [ID, 'char_9002_test', 'char_9003_test', 'char_9004_test', 'char_9005_test', 'char_9006_test'];
   f.put('plugins/phases/plugin.json', { assets: { chars: { char_x_phases_one: { portrait: { ref: 'char_9006_test_2' } } } }, fx: { unit: 'char_9007_test_2' } });
   f.put('plugins/linked/plugin.json', { operators: ['link.json'] });

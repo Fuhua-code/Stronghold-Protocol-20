@@ -365,7 +365,7 @@ test('a second import into the same folder is refused and leaves the first folde
   } finally { fs.rmSync(parent, { recursive: true, force: true }); }
 });
 
-test('malicious zip and directory input is refused and a script in the pack is not executed', async () => {
+test('malicious zip and directory input is refused and a script in the pack is not executed', async (t) => {
   fs.rmSync(BAIT, { force: true });
   const parent = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-forge-'));
   const opts = { pluginsDir: parent, root: ROOT, dataDir: path.join(ROOT, 'data'), vanilla };
@@ -410,7 +410,10 @@ test('malicious zip and directory input is refused and a script in the pack is n
     const linked = path.join(parent, 'linked');
     fs.mkdirSync(linked);
     fs.writeFileSync(path.join(linked, 'pack.json'), '{"id":"rose-linked","name":"x","version":"1.0.0"}');
-    fs.symlinkSync('/tmp', path.join(linked, 'escape'));
+    try { fs.symlinkSync('/tmp', path.join(linked, 'escape')); } catch (e) {
+      if (e?.code === 'EPERM') return t.skip('symbolic links need Windows Developer Mode');
+      throw e;
+    }
     const sym = await importForge(linked, opts);
     assert.equal(sym.issues[0].code, 'PLUGIN_FORGE_ZIP');
     assert.match(sym.issues[0].detail, /symbolic link/);

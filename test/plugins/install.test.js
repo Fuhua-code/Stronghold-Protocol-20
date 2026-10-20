@@ -10,6 +10,7 @@ import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { PLUGIN_LIMITS } from '../../shared/plugins/manifest.js';
+import { NO_SYMLINK } from '../helpers/symlinks.js';
 import { crc32, readPluginZip, zipFiles } from '../../server/plugins/zip.js';
 import {
   INSTALL_MAX_BYTES, fetchHttps, hostAllowed, installFromFile, installFromUrl, installPluginBytes,
@@ -189,7 +190,7 @@ test('https install: hash required before fetch, redirect manual, http and a bad
   } finally { fs.rmSync(tmp, { recursive: true, force: true }); }
 });
 
-test('a symlink id is not followed: status has no version, and --force renames the link', () => {
+test('a symlink id is not followed: status has no version, and --force renames the link', NO_SYMLINK, () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-install-link-'));
   const plugins = path.join(tmp, 'plugins');
   const real = path.join(tmp, 'real');

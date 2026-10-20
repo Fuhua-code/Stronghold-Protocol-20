@@ -9,6 +9,7 @@ import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { startServer } from '../../server/index.js';
 import { Match } from '../../server/match/Match.js';
+import { DELAYS } from '../../server/match/match/common.js';
 import { collectViolations } from '../../server/match/invariants.js';
 import { TestClient } from '../helpers/wsClient.js';
 import { attachWsSimClient } from './simClient.js';
@@ -204,8 +205,8 @@ test('real-time co-op over websockets with the real simulation: 2 humans + 2 AI 
     const phases = new Set(pubs.map((x) => x.phase));
     // (sub-200 ms presentation phases at this timer scale may fall between two throttled m.public frames)
     for (const ph of ['INFO_CHECK', 'BAND_DRAFT', 'SP_DRAFT', 'PREP', 'COMBAT']) assert.ok(phases.has(ph), `${c.id} saw ${ph}`);
-    // Initial/recovery/result/setup-vote forced views are immediate; normal updates have a 200 ms minimum gap.
-    for (let i = 1; i < pubs.length; i++) assert.ok(pubs[i].serverNow - pubs[i - 1].serverNow >= 195, `m.public ${pubs[i].serverNow - pubs[i - 1].serverNow} ms apart`);
+    // Initial/recovery/result/setup-vote forced views are immediate; normal updates follow D021's 125 ms throttle.
+    for (let i = 1; i < pubs.length; i++) assert.ok(pubs[i].serverNow - pubs[i - 1].serverNow >= DELAYS.PUBLIC_THROTTLE - 5, `m.public ${pubs[i].serverNow - pubs[i - 1].serverNow} ms apart`);
     const priv = latest(c, 'm.private');
     assert.equal(priv.hand.length, 10);
     assert.equal(priv.temp.length, 5);

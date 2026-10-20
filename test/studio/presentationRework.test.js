@@ -1,5 +1,6 @@
 // Second-review regressions: synthetic media only; HTTP is exercised without listening sockets.
 import { test } from 'node:test';
+import { NO_SYMLINK } from '../helpers/symlinks.js';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -136,7 +137,7 @@ test('P2: external overlay effect sheets enforce decoding and FX subset, ordinar
   assert.equal((await m.api('files/art.PNG', encoded({ depth: 16, interlace: 1 }), 'PUT')).status, 200); noCandidates(m);
 });
 
-test('candidates refuse hidden links before staging, use clone fallback, and clean failed edits/timeouts', async t => {
+test('candidates refuse hidden links before staging, use clone fallback, and clean failed edits/timeouts', NO_SYMLINK, async t => {
   const m = setup(t); fs.symlinkSync(m.dir, path.join(m.dir, '.hidden'));
   await assert.rejects(editMediaDraft(m.files, m.id, () => assert.fail('must not stage'), { dataDir: path.resolve('data') }), { code: 'PLUGIN_STUDIO_PATH' });
   noCandidates(m); fs.unlinkSync(path.join(m.dir, '.hidden'));
